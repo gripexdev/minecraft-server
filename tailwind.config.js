@@ -4,7 +4,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Oxanium', 'sans-serif'],
+        sans: ['Sora', 'sans-serif'],
         pixel: ['VT323', 'monospace'],
       },
     },

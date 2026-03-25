@@ -1,5 +1,6 @@
 import { useReducedMotion } from 'framer-motion'
 import type { HTMLAttributes, PointerEvent, ReactNode } from 'react'
+import { useCanHover } from '../hooks/useCanHover'
 
 type TiltCardProps = HTMLAttributes<HTMLDivElement> & {
   children: ReactNode
@@ -13,11 +14,12 @@ export function TiltCard({
   ...props
 }: TiltCardProps) {
   const shouldReduceMotion = useReducedMotion()
+  const canHover = useCanHover()
 
   const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
     onPointerMove?.(event)
 
-    if (shouldReduceMotion) {
+    if (shouldReduceMotion || !canHover) {
       return
     }
 
@@ -47,8 +49,8 @@ export function TiltCard({
   return (
     <div
       className={`tilt-panel relative overflow-hidden ${className}`.trim()}
-      onPointerMove={handlePointerMove}
-      onPointerLeave={handlePointerLeave}
+      onPointerMove={canHover ? handlePointerMove : undefined}
+      onPointerLeave={canHover ? handlePointerLeave : undefined}
       {...props}
     >
       <div className="tilt-shine" />

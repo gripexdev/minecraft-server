@@ -61,10 +61,10 @@ export function CopyIpButton({
     <button
       type="button"
       onClick={handleCopy}
-      className={`inline-flex items-center justify-center gap-2 rounded-full border px-4 py-3 text-sm font-semibold uppercase tracking-[0.2em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#040705] ${
+      className={`button-base button-secondary button-md ${
         copied
-          ? 'border-emerald-200/30 bg-emerald-300/16 text-emerald-50'
-          : 'border-white/12 bg-white/[0.05] text-white/85 hover:border-white/20 hover:bg-white/[0.08] hover:text-white'
+          ? 'copy-button-active'
+          : ''
       } ${className}`.trim()}
       aria-label="Copy server IP"
     >

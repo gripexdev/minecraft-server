@@ -25,7 +25,16 @@ export function Reveal({
       className={className}
       initial={{ opacity: 0, y: distance }}
       whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.7, delay, ease: [0.2, 0.9, 0.2, 1] }}
+      transition={{
+        opacity: { duration: 0.48, delay, ease: [0.22, 1, 0.36, 1] },
+        y: {
+          type: 'spring',
+          stiffness: 110,
+          damping: 18,
+          mass: 0.84,
+          delay,
+        },
+      }}
       viewport={{ once: true, amount: 0.22 }}
     >
       {children}

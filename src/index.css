@@ -1,0 +1,185 @@
+@import '@fontsource/oxanium/400.css';
+@import '@fontsource/oxanium/500.css';
+@import '@fontsource/oxanium/600.css';
+@import '@fontsource/oxanium/700.css';
+@import '@fontsource/vt323';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background:
+    radial-gradient(circle at top, rgba(130, 255, 137, 0.14), transparent 24%),
+    radial-gradient(circle at 86% 16%, rgba(117, 146, 255, 0.16), transparent 28%),
+    linear-gradient(180deg, #050b09 0%, #030605 42%, #020303 100%);
+  color: #eef9f1;
+  font-family: 'Oxanium', sans-serif;
+}
+
+::selection {
+  background: rgba(142, 255, 145, 0.3);
+  color: #fbfffc;
+}
+
+#root {
+  min-height: 100svh;
+}
+
+@layer base {
+  * {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  a {
+    @apply no-underline;
+  }
+
+  button {
+    font: inherit;
+  }
+}
+
+@layer components {
+  .container-shell {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .glass-panel {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.36);
+    backdrop-filter: blur(28px);
+  }
+
+  .section-label {
+    font-family: 'VT323', monospace;
+    font-size: 1.15rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(198, 255, 203, 0.78);
+  }
+
+  .pill-chip {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(20px);
+  }
+
+  .button-base {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 999px;
+    padding: 0.875rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    transition: transform 180ms ease, background-color 180ms ease, border-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
+  }
+
+  .button-primary {
+    background: linear-gradient(90deg, #8cf7a4 0%, #d7ff93 52%, #73f58f 100%);
+    color: #08110c;
+    box-shadow: 0 18px 48px rgba(124, 255, 134, 0.26);
+  }
+
+  .button-secondary {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.88);
+  }
+
+  .button-secondary:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+  }
+
+  .button-base:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px rgba(214, 255, 216, 0.8),
+      0 0 0 6px rgba(4, 7, 5, 0.95);
+  }
+
+  .bg-grid-mask {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 5rem 5rem;
+    mask-image: radial-gradient(circle at center, black, transparent 78%);
+  }
+
+  .tilt-panel {
+    transform:
+      perspective(1400px)
+      rotateX(var(--rotate-x, 0deg))
+      rotateY(var(--rotate-y, 0deg))
+      translateZ(0);
+    transition:
+      transform 180ms ease,
+      border-color 180ms ease,
+      background-color 180ms ease;
+    will-change: transform;
+  }
+
+  .tilt-panel:hover {
+    border-color: rgba(158, 255, 162, 0.2);
+    background-color: rgba(255, 255, 255, 0.06);
+  }
+
+  .tilt-shine {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 180ms ease;
+    background:
+      radial-gradient(
+        circle at var(--pointer-x, 50%) var(--pointer-y, 50%),
+        rgba(136, 255, 152, 0.18),
+        transparent 44%
+      );
+  }
+
+  .tilt-panel:hover .tilt-shine {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "The Village S3",
+  "short_name": "Village S3",
+  "description": "Vote for The Village S3, join the Discord, copy the server IP, and jump into Season 3.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050907",
+  "theme_color": "#07110d",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

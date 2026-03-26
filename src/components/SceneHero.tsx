@@ -10,6 +10,12 @@ import type { HTMLAttributes } from 'react'
 
 type SceneHeroProps = HTMLAttributes<HTMLDivElement>
 type RenderMode = 'scene' | 'fallback'
+type DeviceNavigator = Navigator & {
+  connection?: {
+    saveData?: boolean
+    effectiveType?: string
+  }
+}
 
 const SceneHeroCanvas = lazy(() => import('./SceneHeroCanvas'))
 
@@ -102,6 +108,7 @@ function resolveRenderMode(shouldReduceMotion: boolean): RenderMode {
 export function SceneHero({ className = '', ...props }: SceneHeroProps) {
   const shouldReduceMotion = useReducedMotion()
   const [renderMode, setRenderMode] = useState<RenderMode>('fallback')
+  const [sceneEnabled, setSceneEnabled] = useState(false)
 
   useEffect(() => {
     startTransition(() => {
@@ -109,13 +116,65 @@ export function SceneHero({ className = '', ...props }: SceneHeroProps) {
     })
   }, [shouldReduceMotion])
 
+  useEffect(() => {
+    if (renderMode !== 'scene' || typeof window === 'undefined') {
+      return
+    }
+
+    const deviceNavigator = navigator as DeviceNavigator
+    const prefersLowData =
+      deviceNavigator.connection?.saveData === true ||
+      deviceNavigator.connection?.effectiveType === 'slow-2g' ||
+      deviceNavigator.connection?.effectiveType === '2g'
+
+    if (prefersLowData) {
+      return
+    }
+
+    let cancelled = false
+    let timeoutId: number | null = null
+    let idleId: number | null = null
+
+    const enableScene = () => {
+      if (cancelled) {
+        return
+      }
+
+      startTransition(() => {
+        setSceneEnabled(true)
+      })
+    }
+
+    const hasIdleCallback =
+      typeof window.requestIdleCallback === 'function' &&
+      typeof window.cancelIdleCallback === 'function'
+
+    if (hasIdleCallback) {
+      idleId = window.requestIdleCallback(enableScene, { timeout: 1800 })
+    } else {
+      timeoutId = window.setTimeout(enableScene, 900)
+    }
+
+    return () => {
+      cancelled = true
+
+      if (idleId !== null && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(idleId)
+      }
+
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId)
+      }
+    }
+  }, [renderMode])
+
   return (
     <div
       aria-hidden="true"
       className={`${className} pointer-events-none overflow-hidden`.trim()}
       {...props}
     >
-      {renderMode === 'scene' ? (
+      {renderMode === 'scene' && sceneEnabled ? (
         <Suspense fallback={<HeroSceneFallback />}>
           <SceneHeroCanvas />
         </Suspense>

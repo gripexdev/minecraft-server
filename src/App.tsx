@@ -36,6 +36,8 @@ function App() {
   const canHover = useCanHover()
   const { scrollYProgress } = useScroll()
   const rootRef = useRef<HTMLDivElement>(null)
+  const pointerFrameRef = useRef<number | null>(null)
+  const pointerPositionRef = useRef({ x: '72%', y: '14%' })
   const [activeSection, setActiveSection] = useState('top')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -96,6 +98,14 @@ function App() {
     }
   }, [mobileMenuOpen])
 
+  useEffect(() => {
+    return () => {
+      if (pointerFrameRef.current !== null) {
+        window.cancelAnimationFrame(pointerFrameRef.current)
+      }
+    }
+  }, [])
+
   const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (Boolean(shouldReduceMotion) || !canHover || !rootRef.current) {
       return
@@ -105,13 +115,35 @@ function App() {
     const x = ((event.clientX - rect.left) / rect.width) * 100
     const y = ((event.clientY - rect.top) / rect.height) * 100
 
-    rootRef.current.style.setProperty('--pointer-x', `${x.toFixed(2)}%`)
-    rootRef.current.style.setProperty('--pointer-y', `${y.toFixed(2)}%`)
+    pointerPositionRef.current = {
+      x: `${x.toFixed(2)}%`,
+      y: `${y.toFixed(2)}%`,
+    }
+
+    if (pointerFrameRef.current !== null) {
+      return
+    }
+
+    pointerFrameRef.current = window.requestAnimationFrame(() => {
+      pointerFrameRef.current = null
+
+      if (!rootRef.current) {
+        return
+      }
+
+      rootRef.current.style.setProperty('--pointer-x', pointerPositionRef.current.x)
+      rootRef.current.style.setProperty('--pointer-y', pointerPositionRef.current.y)
+    })
   }
 
   const handlePointerLeave = () => {
     if (!rootRef.current) {
       return
+    }
+
+    if (pointerFrameRef.current !== null) {
+      window.cancelAnimationFrame(pointerFrameRef.current)
+      pointerFrameRef.current = null
     }
 
     rootRef.current.style.setProperty('--pointer-x', '72%')

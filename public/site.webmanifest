@@ -1,6 +1,8 @@
 {
   "name": "The Village S3",
   "short_name": "Village S3",
+  "id": "/",
+  "scope": "/",
   "description": "Vote for The Village S3, join the Discord, copy the server IP, and jump into Season 3.",
   "start_url": "/",
   "display": "standalone",

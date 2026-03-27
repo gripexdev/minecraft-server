@@ -201,12 +201,12 @@ function App() {
 
       <LandingFooter navItems={navItems} />
 
-      <div className="fixed inset-x-0 bottom-4 z-50 px-4 lg:hidden">
-        <div className="mx-auto flex max-w-md items-center gap-2 rounded-full border border-white/12 bg-[rgba(6,10,8,0.9)] p-2 shadow-[0_18px_60px_rgba(0,0,0,0.48)] backdrop-blur-2xl">
+      <div className="fixed inset-x-0 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-50 px-3 sm:px-4 lg:hidden">
+        <div className="mx-auto flex max-w-lg items-center gap-2 rounded-[1.6rem] border border-white/12 bg-[rgba(6,10,8,0.92)] p-2.5 shadow-[0_18px_60px_rgba(0,0,0,0.48)] backdrop-blur-2xl sm:rounded-full">
           <ButtonLink href={VOTE_URL} className="min-w-0 flex-1 justify-center" size="lg">
             Vote Now
           </ButtonLink>
-          <CopyIpButton compact className="shrink-0 px-4 py-4" />
+          <CopyIpButton compact className="shrink-0 px-4 py-[1.08rem]" />
         </div>
       </div>
     </div>

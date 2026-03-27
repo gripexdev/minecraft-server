@@ -17,59 +17,135 @@ type IsoBlockProps = {
   opacity?: number
 }
 
+type PropProps = {
+  x: number
+  y: number
+  scale?: number
+}
+
+type Tile = IsoBlockProps & {
+  key: string
+}
+
 const ambientParticles = [
-  { left: '12%', top: '18%', size: 10, duration: 8.8, delay: 0.2 },
-  { left: '24%', top: '32%', size: 6, duration: 7.8, delay: 1.1 },
-  { left: '34%', top: '14%', size: 8, duration: 10.2, delay: 0.7 },
-  { left: '58%', top: '22%', size: 8, duration: 8.4, delay: 1.5 },
-  { left: '74%', top: '17%', size: 10, duration: 9.1, delay: 0.4 },
-  { left: '82%', top: '34%', size: 7, duration: 7.6, delay: 1.9 },
+  { left: '11%', top: '18%', size: 9, duration: 9.6, delay: 0.2 },
+  { left: '20%', top: '33%', size: 6, duration: 8.1, delay: 1.1 },
+  { left: '33%', top: '13%', size: 8, duration: 10.4, delay: 0.5 },
+  { left: '56%', top: '24%', size: 7, duration: 7.9, delay: 1.5 },
+  { left: '73%', top: '16%', size: 9, duration: 9.1, delay: 0.4 },
+  { left: '84%', top: '31%', size: 7, duration: 8.7, delay: 1.8 },
 ]
 
 const floatingBlocks = [
   {
-    x: 320,
-    y: 374,
-    halfWidth: 24,
-    halfHeight: 13,
-    depth: 36,
-    delay: 0.3,
-  },
-  {
-    x: 585,
-    y: 340,
+    x: 286,
+    y: 332,
     halfWidth: 20,
     halfHeight: 11,
-    depth: 31,
+    depth: 24,
+    delay: 0.4,
+  },
+  {
+    x: 628,
+    y: 318,
+    halfWidth: 22,
+    halfHeight: 12,
+    depth: 26,
     delay: 1.4,
   },
   {
-    x: 670,
+    x: 688,
     y: 430,
     halfWidth: 16,
     halfHeight: 9,
-    depth: 24,
+    depth: 18,
     delay: 0.9,
   },
 ]
 
-const floorTiles = Array.from({ length: 6 }, (_, row) =>
-  Array.from({ length: 6 }, (_, column) => {
-    const focusBand = row >= 1 && row <= 3 && column >= 1 && column <= 4
+const pathTileKeys = new Set(['1-2', '2-1', '2-2', '3-1'])
+const islandLevels = [
+  [0, 1, 1, 1, 0],
+  [1, 2, 2, 2, 1],
+  [1, 2, 3, 2, 1],
+  [0, 1, 2, 1, 0],
+]
 
-    return {
-      x: 450 + (column - row) * 68,
-      y: 704 + (column + row) * 36,
-      halfWidth: 64,
-      halfHeight: 34,
-      depth: focusBand ? 28 : 22,
-      topFill: focusBand ? '#143523' : '#0d1f17',
-      leftFill: focusBand ? '#0d2619' : '#08120e',
-      rightFill: focusBand ? '#19402a' : '#10261b',
-      opacity: focusBand ? 1 : 0.9,
+const islandTiles: Tile[] = []
+
+for (let rowIndex = 0; rowIndex < islandLevels.length; rowIndex += 1) {
+  for (
+    let columnIndex = 0;
+    columnIndex < islandLevels[rowIndex].length;
+    columnIndex += 1
+  ) {
+    const level = islandLevels[rowIndex][columnIndex]
+
+    if (level === 0) {
+      continue
     }
-  }),
-).flat()
+
+    const key = `${rowIndex}-${columnIndex}`
+    const isPath = pathTileKeys.has(key)
+    const isBeaconTile = rowIndex === 2 && columnIndex === 2
+
+    islandTiles.push({
+      key,
+      x: 450 + (columnIndex - rowIndex) * 72,
+      y: 430 + (columnIndex + rowIndex) * 38 - level * 24,
+      halfWidth: 72,
+      halfHeight: 38,
+      depth: 112 + level * 18,
+      topFill: isBeaconTile
+        ? '#7EE094'
+        : isPath
+          ? '#7B8F86'
+          : '#5AAE61',
+      leftFill: isBeaconTile ? '#38533E' : isPath ? '#495851' : '#5D3C21',
+      rightFill: isBeaconTile ? '#A5F0BA' : isPath ? '#697B73' : '#77502E',
+      stroke: 'rgba(235,255,239,0.08)',
+    })
+  }
+}
+
+const supportBlocks: Tile[] = [
+  {
+    key: 'support-center',
+    x: 450,
+    y: 636,
+    halfWidth: 58,
+    halfHeight: 30,
+    depth: 118,
+    topFill: '#2C1E14',
+    leftFill: '#130D09',
+    rightFill: '#3C281B',
+    opacity: 0.94,
+  },
+  {
+    key: 'support-left',
+    x: 380,
+    y: 668,
+    halfWidth: 42,
+    halfHeight: 22,
+    depth: 94,
+    topFill: '#251911',
+    leftFill: '#100B08',
+    rightFill: '#332218',
+    opacity: 0.9,
+  },
+  {
+    key: 'support-right',
+    x: 520,
+    y: 666,
+    halfWidth: 42,
+    halfHeight: 22,
+    depth: 94,
+    topFill: '#251911',
+    leftFill: '#100B08',
+    rightFill: '#332218',
+    opacity: 0.9,
+  },
+]
 
 function pointsToString(points: Point[]) {
   return points.map(([x, y]) => `${x},${y}`).join(' ')
@@ -132,6 +208,232 @@ function IsoBlock({
   )
 }
 
+function IsoTree({ x, y, scale = 1 }: PropProps) {
+  return (
+    <g>
+      <IsoBlock
+        x={x}
+        y={y}
+        halfWidth={14 * scale}
+        halfHeight={8 * scale}
+        depth={78 * scale}
+        topFill="#986D37"
+        leftFill="#5A3917"
+        rightFill="#B47D3F"
+        stroke="rgba(255,244,226,0.08)"
+      />
+      <IsoBlock
+        x={x}
+        y={y - 56 * scale}
+        halfWidth={40 * scale}
+        halfHeight={22 * scale}
+        depth={28 * scale}
+        topFill="#4DA85A"
+        leftFill="#235231"
+        rightFill="#6BD17A"
+      />
+      <IsoBlock
+        x={x - 28 * scale}
+        y={y - 38 * scale}
+        halfWidth={24 * scale}
+        halfHeight={14 * scale}
+        depth={22 * scale}
+        topFill="#4B9F57"
+        leftFill="#204C2D"
+        rightFill="#63C872"
+      />
+      <IsoBlock
+        x={x + 28 * scale}
+        y={y - 38 * scale}
+        halfWidth={24 * scale}
+        halfHeight={14 * scale}
+        depth={22 * scale}
+        topFill="#4B9F57"
+        leftFill="#204C2D"
+        rightFill="#63C872"
+      />
+      <IsoBlock
+        x={x}
+        y={y - 88 * scale}
+        halfWidth={24 * scale}
+        halfHeight={14 * scale}
+        depth={20 * scale}
+        topFill="#63C872"
+        leftFill="#285733"
+        rightFill="#85E091"
+      />
+    </g>
+  )
+}
+
+function BeaconRig({
+  x,
+  y,
+  shouldReduceMotion,
+}: {
+  x: number
+  y: number
+  shouldReduceMotion: boolean
+}) {
+  return (
+    <g>
+      <motion.g
+        animate={
+          shouldReduceMotion
+            ? undefined
+            : {
+                opacity: [0.56, 0.92, 0.56],
+                scaleY: [0.98, 1.04, 0.98],
+              }
+        }
+        transition={{
+          duration: 5.6,
+          repeat: Number.POSITIVE_INFINITY,
+          ease: 'easeInOut',
+        }}
+        style={{
+          transformOrigin: `${x}px 110px`,
+        }}
+      >
+        <ellipse
+          cx={x}
+          cy={y - 110}
+          rx="92"
+          ry="92"
+          fill="rgba(137,255,160,0.24)"
+          filter="url(#softBlur)"
+        />
+        <rect
+          x={x - 28}
+          y="112"
+          width="56"
+          height={y - 112}
+          rx="28"
+          fill="url(#beaconAura)"
+        />
+        <rect
+          x={x - 8}
+          y="116"
+          width="16"
+          height={y - 128}
+          rx="8"
+          fill="url(#beaconCore)"
+        />
+      </motion.g>
+
+      <ellipse
+        cx={x}
+        cy={y + 34}
+        rx="84"
+        ry="34"
+        fill="rgba(120,255,146,0.18)"
+        filter="url(#softBlur)"
+      />
+
+      <IsoBlock
+        x={x}
+        y={y}
+        halfWidth={58}
+        halfHeight={30}
+        depth={34}
+        topFill="#B6C7CD"
+        leftFill="#55616A"
+        rightFill="#E7F2F5"
+      />
+      <IsoBlock
+        x={x}
+        y={y - 34}
+        halfWidth={40}
+        halfHeight={22}
+        depth={28}
+        topFill="#90FFD3"
+        leftFill="#3E7D62"
+        rightFill="#D6FFF0"
+        stroke="rgba(248,255,250,0.24)"
+      />
+    </g>
+  )
+}
+
+function SwordMonument({
+  x,
+  y,
+  shouldReduceMotion,
+}: {
+  x: number
+  y: number
+  shouldReduceMotion: boolean
+}) {
+  return (
+    <motion.g
+      animate={
+        shouldReduceMotion
+          ? undefined
+          : {
+              y: [0, -3, 0],
+            }
+      }
+      transition={{
+        duration: 6.2,
+        repeat: Number.POSITIVE_INFINITY,
+        ease: 'easeInOut',
+      }}
+    >
+      <ellipse
+        cx={x}
+        cy={y + 58}
+        rx="30"
+        ry="14"
+        fill="rgba(0,0,0,0.28)"
+      />
+
+      <g transform={`rotate(34 ${x} ${y + 8})`}>
+        <rect
+          x={x - 5}
+          y={y + 8}
+          width="10"
+          height="84"
+          rx="4"
+          fill="url(#bladeGradient)"
+        />
+        <rect x={x - 16} y={y + 78} width="32" height="8" rx="4" fill="#D9F8FF" />
+        <rect x={x - 4} y={y + 86} width="8" height="24" rx="4" fill="#7C4B27" />
+        <rect x={x - 10} y={y + 104} width="20" height="10" rx="4" fill="#3A2214" />
+      </g>
+    </motion.g>
+  )
+}
+
+function TreasureCrate({ x, y, scale = 1 }: PropProps) {
+  return (
+    <g>
+      <IsoBlock
+        x={x}
+        y={y}
+        halfWidth={20 * scale}
+        halfHeight={11 * scale}
+        depth={28 * scale}
+        topFill="#D08232"
+        leftFill="#6F3918"
+        rightFill="#E59B4B"
+      />
+      <rect
+        x={x - 3 * scale}
+        y={y + 10 * scale}
+        width={6 * scale}
+        height={12 * scale}
+        rx={2 * scale}
+        fill="#F6E1A8"
+      />
+      <path
+        d={`M ${x - 17 * scale} ${y + 2 * scale} L ${x + 17 * scale} ${y + 20 * scale}`}
+        stroke="rgba(54,24,11,0.34)"
+        strokeWidth={2 * scale}
+      />
+    </g>
+  )
+}
+
 export function SceneHero({ className = '', ...props }: SceneHeroProps) {
   const shouldReduceMotion = useReducedMotion()
 
@@ -141,16 +443,15 @@ export function SceneHero({ className = '', ...props }: SceneHeroProps) {
       className={`${className} pointer-events-none overflow-hidden`.trim()}
       {...props}
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_14%,rgba(148,255,158,0.16),transparent_28%),radial-gradient(circle_at_76%_18%,rgba(123,153,255,0.14),transparent_22%),linear-gradient(180deg,rgba(7,13,10,0.18),rgba(4,8,6,0.78)_60%,rgba(2,4,4,0.96)_100%)]" />
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),transparent_16%),radial-gradient(circle_at_50%_100%,rgba(1,5,4,0.94),transparent_44%)]" />
-      <div className="absolute inset-x-[8%] inset-y-[7%] rounded-[2.2rem] border border-white/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.01))] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]" />
-      <div className="absolute inset-x-[16%] top-[8%] h-28 rounded-full bg-emerald-300/14 blur-3xl sm:h-36" />
-      <div className="absolute left-1/2 top-[11%] h-52 w-36 -translate-x-1/2 rounded-full bg-[linear-gradient(180deg,rgba(140,255,166,0.22),rgba(140,255,166,0.02))] blur-3xl sm:h-64 sm:w-44" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_14%,rgba(144,255,160,0.18),transparent_26%),radial-gradient(circle_at_78%_18%,rgba(108,138,255,0.16),transparent_22%),linear-gradient(180deg,rgba(10,18,13,0.1),rgba(5,10,8,0.82)_62%,rgba(2,4,4,0.98)_100%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),transparent_16%),radial-gradient(circle_at_50%_100%,rgba(1,4,3,0.96),transparent_46%)]" />
+      <div className="absolute inset-x-[8%] inset-y-[7%] rounded-[2.2rem] border border-white/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01))] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]" />
+      <div className="absolute inset-x-[18%] top-[10%] h-28 rounded-full bg-emerald-300/12 blur-3xl sm:h-36" />
 
       {ambientParticles.map((particle) => (
         <motion.span
           key={`${particle.left}-${particle.top}`}
-          className="absolute rounded-full bg-emerald-100/80 shadow-[0_0_18px_rgba(153,255,176,0.56)]"
+          className="absolute rounded-[3px] bg-emerald-100/80 shadow-[0_0_18px_rgba(153,255,176,0.56)]"
           style={{
             left: particle.left,
             top: particle.top,
@@ -163,7 +464,7 @@ export function SceneHero({ className = '', ...props }: SceneHeroProps) {
               : {
                   y: [0, -16, 0],
                   opacity: [0.2, 0.9, 0.2],
-                  scale: [0.96, 1.14, 0.96],
+                  scale: [0.94, 1.12, 0.94],
                 }
           }
           transition={{
@@ -198,187 +499,106 @@ export function SceneHero({ className = '', ...props }: SceneHeroProps) {
           xmlns="http://www.w3.org/2000/svg"
         >
           <defs>
-            <linearGradient id="sceneShell" x1="450" y1="92" x2="450" y2="866">
-              <stop stopColor="#13221A" />
-              <stop offset="0.54" stopColor="#0A120E" />
-              <stop offset="1" stopColor="#060A08" />
+            <linearGradient id="beaconAura" x1="450" y1="112" x2="450" y2="470">
+              <stop stopColor="rgba(180,255,191,0)" />
+              <stop offset="0.24" stopColor="rgba(180,255,191,0.22)" />
+              <stop offset="0.65" stopColor="rgba(132,255,151,0.74)" />
+              <stop offset="1" stopColor="rgba(132,255,151,0)" />
             </linearGradient>
-            <linearGradient id="sceneStroke" x1="450" y1="92" x2="450" y2="866">
-              <stop stopColor="rgba(226,255,233,0.16)" />
-              <stop offset="1" stopColor="rgba(226,255,233,0.03)" />
+            <linearGradient id="beaconCore" x1="450" y1="118" x2="450" y2="462">
+              <stop stopColor="rgba(241,255,245,0.08)" />
+              <stop offset="0.55" stopColor="rgba(241,255,245,0.94)" />
+              <stop offset="1" stopColor="rgba(241,255,245,0)" />
             </linearGradient>
-            <linearGradient id="beamFill" x1="450" y1="128" x2="450" y2="618">
-              <stop stopColor="rgba(186,255,200,0)" />
-              <stop offset="0.25" stopColor="rgba(186,255,200,0.24)" />
-              <stop offset="0.62" stopColor="rgba(144,255,164,0.72)" />
-              <stop offset="1" stopColor="rgba(144,255,164,0)" />
+            <linearGradient id="bladeGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="#F0FEFF" />
+              <stop offset="0.38" stopColor="#9FE9FF" />
+              <stop offset="1" stopColor="#3CC9F7" />
             </linearGradient>
-            <linearGradient id="beamCore" x1="450" y1="152" x2="450" y2="580">
-              <stop stopColor="rgba(243,255,246,0.04)" />
-              <stop offset="0.56" stopColor="rgba(243,255,246,0.88)" />
-              <stop offset="1" stopColor="rgba(243,255,246,0)" />
-            </linearGradient>
-            <radialGradient id="portalGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(450 430) rotate(90) scale(220 220)">
-              <stop stopColor="rgba(149,255,171,0.42)" />
-              <stop offset="0.58" stopColor="rgba(149,255,171,0.12)" />
-              <stop offset="1" stopColor="rgba(149,255,171,0)" />
+            <radialGradient
+              id="skyGlow"
+              cx="0"
+              cy="0"
+              r="1"
+              gradientUnits="userSpaceOnUse"
+              gradientTransform="translate(450 420) rotate(90) scale(220 220)"
+            >
+              <stop stopColor="rgba(117,255,142,0.26)" />
+              <stop offset="1" stopColor="rgba(117,255,142,0)" />
             </radialGradient>
-            <linearGradient id="ringStroke" x1="292" y1="418" x2="608" y2="418">
-              <stop stopColor="rgba(206,255,217,0.14)" />
-              <stop offset="0.5" stopColor="rgba(206,255,217,0.78)" />
-              <stop offset="1" stopColor="rgba(206,255,217,0.14)" />
-            </linearGradient>
-            <radialGradient id="floorGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(450 720) rotate(90) scale(230 260)">
-              <stop stopColor="rgba(102,255,134,0.24)" />
-              <stop offset="1" stopColor="rgba(102,255,134,0)" />
+            <radialGradient
+              id="floorGlow"
+              cx="0"
+              cy="0"
+              r="1"
+              gradientUnits="userSpaceOnUse"
+              gradientTransform="translate(450 730) rotate(90) scale(260 160)"
+            >
+              <stop stopColor="rgba(94,255,122,0.22)" />
+              <stop offset="1" stopColor="rgba(94,255,122,0)" />
             </radialGradient>
             <filter id="softBlur" x="-50%" y="-50%" width="200%" height="200%">
               <feGaussianBlur stdDeviation="26" />
             </filter>
-            <filter id="floorBlur" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="38" />
+            <filter id="wideBlur" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="44" />
             </filter>
           </defs>
 
           <rect
-            x="118"
-            y="94"
-            width="664"
-            height="772"
-            rx="70"
-            fill="url(#sceneShell)"
-            stroke="rgba(225,255,232,0.08)"
+            x="116"
+            y="90"
+            width="668"
+            height="786"
+            rx="74"
+            fill="rgba(7,12,9,0.74)"
+            stroke="rgba(230,255,234,0.08)"
+          />
+          <rect
+            x="138"
+            y="112"
+            width="624"
+            height="742"
+            rx="56"
+            stroke="rgba(230,255,234,0.05)"
           />
 
           <path
-            d="M118 502L198 450L254 478L344 398L430 456L430 866H118V502Z"
-            fill="#0A1610"
-            opacity="0.82"
-          />
-          <path
-            d="M782 502L700 448L644 476L560 406L470 456V866H782V502Z"
-            fill="#0A1610"
-            opacity="0.82"
-          />
-          <path
-            d="M188 398L244 358L324 394L390 346L454 380V446H188V398Z"
-            fill="#11241B"
-            opacity="0.78"
-          />
-          <path
-            d="M708 398L652 358L572 394L506 346L442 380V446H708V398Z"
-            fill="#11241B"
-            opacity="0.78"
-          />
-
-          <ellipse
-            cx="450"
-            cy="632"
-            rx="230"
-            ry="118"
-            fill="url(#floorGlow)"
-            filter="url(#floorBlur)"
+            d="M112 488L188 440L248 468L320 418L404 462L404 876H112V488Z"
+            fill="#08120D"
             opacity="0.9"
           />
+          <path
+            d="M788 494L714 446L652 474L580 422L496 466V876H788V494Z"
+            fill="#08120D"
+            opacity="0.9"
+          />
+          <path
+            d="M194 378L258 340L324 372L402 328L470 362V428H194V378Z"
+            fill="#122119"
+            opacity="0.72"
+          />
+          <path
+            d="M706 372L642 334L576 366L498 322L430 356V424H706V372Z"
+            fill="#122119"
+            opacity="0.72"
+          />
+
           <ellipse
             cx="450"
-            cy="434"
-            rx="178"
-            ry="178"
-            fill="url(#portalGlow)"
+            cy="428"
+            rx="196"
+            ry="170"
+            fill="url(#skyGlow)"
             filter="url(#softBlur)"
           />
-          <rect x="414" y="126" width="72" height="472" rx="36" fill="url(#beamFill)" />
-          <rect x="442" y="148" width="16" height="430" rx="8" fill="url(#beamCore)" />
-
           <ellipse
             cx="450"
-            cy="430"
-            rx="152"
-            ry="152"
-            stroke="url(#ringStroke)"
-            strokeWidth="2"
-            strokeDasharray="12 12"
-            opacity="0.7"
-          />
-
-          <IsoBlock
-            x={270}
-            y={548}
-            halfWidth={72}
-            halfHeight={38}
-            depth={170}
-            topFill="#132A1D"
-            leftFill="#0A1710"
-            rightFill="#1A3A29"
-            opacity={0.9}
-          />
-          <IsoBlock
-            x={630}
-            y={512}
-            halfWidth={80}
-            halfHeight={42}
-            depth={194}
-            topFill="#132A1D"
-            leftFill="#0A1710"
-            rightFill="#1A3A29"
-            opacity={0.9}
-          />
-
-          <path
-            d="M250 474L344 418L344 676L250 730V474Z"
-            fill="rgba(168,255,186,0.08)"
-          />
-          <path
-            d="M650 440L556 386L556 654L650 708V440Z"
-            fill="rgba(143,164,255,0.08)"
-          />
-
-          {floorTiles.map((tile, index) => (
-            <IsoBlock
-              key={`${tile.x}-${tile.y}-${index}`}
-              x={tile.x}
-              y={tile.y}
-              halfWidth={tile.halfWidth}
-              halfHeight={tile.halfHeight}
-              depth={tile.depth}
-              topFill={tile.topFill}
-              leftFill={tile.leftFill}
-              rightFill={tile.rightFill}
-              opacity={tile.opacity}
-              stroke="rgba(220,255,228,0.05)"
-            />
-          ))}
-
-          <IsoBlock
-            x={450}
-            y={616}
-            halfWidth={118}
-            halfHeight={60}
-            depth={54}
-            topFill="#1A442D"
-            leftFill="#0C2016"
-            rightFill="#245A3A"
-          />
-          <IsoBlock
-            x={450}
-            y={576}
-            halfWidth={88}
-            halfHeight={46}
-            depth={40}
-            topFill="#275C3C"
-            leftFill="#143121"
-            rightFill="#33784B"
-          />
-          <IsoBlock
-            x={450}
-            y={542}
-            halfWidth={54}
-            halfHeight={28}
-            depth={28}
-            topFill="#316F47"
-            leftFill="#173624"
-            rightFill="#4A9A61"
+            cy="730"
+            rx="252"
+            ry="132"
+            fill="url(#floorGlow)"
+            filter="url(#wideBlur)"
           />
 
           <motion.g
@@ -386,45 +606,73 @@ export function SceneHero({ className = '', ...props }: SceneHeroProps) {
               shouldReduceMotion
                 ? undefined
                 : {
-                    y: [0, -18, 0],
+                    y: [0, -10, 0],
                   }
             }
             transition={{
-              duration: 6.4,
+              duration: 7.8,
               repeat: Number.POSITIVE_INFINITY,
               ease: 'easeInOut',
             }}
           >
-            <ellipse
-              cx="450"
-              cy="462"
-              rx="118"
-              ry="54"
-              fill="rgba(146,255,168,0.18)"
-              filter="url(#softBlur)"
+            <BeaconRig x={450} y={484} shouldReduceMotion={Boolean(shouldReduceMotion)} />
+
+            {supportBlocks.map((block) => (
+              <IsoBlock
+                key={block.key}
+                x={block.x}
+                y={block.y}
+                halfWidth={block.halfWidth}
+                halfHeight={block.halfHeight}
+                depth={block.depth}
+                topFill={block.topFill}
+                leftFill={block.leftFill}
+                rightFill={block.rightFill}
+                opacity={block.opacity}
+              />
+            ))}
+
+            {islandTiles.map((tile) => (
+              <IsoBlock
+                key={tile.key}
+                x={tile.x}
+                y={tile.y}
+                halfWidth={tile.halfWidth}
+                halfHeight={tile.halfHeight}
+                depth={tile.depth}
+                topFill={tile.topFill}
+                leftFill={tile.leftFill}
+                rightFill={tile.rightFill}
+                stroke={tile.stroke}
+                opacity={tile.opacity}
+              />
+            ))}
+
+            <IsoTree x={344} y={454} scale={1.04} />
+            <IsoTree x={566} y={438} scale={0.96} />
+
+            <TreasureCrate x={346} y={572} scale={1.04} />
+            <SwordMonument x={578} y={534} shouldReduceMotion={Boolean(shouldReduceMotion)} />
+
+            <IsoBlock
+              x={504}
+              y={560}
+              halfWidth={30}
+              halfHeight={16}
+              depth={20}
+              topFill="#7C9388"
+              leftFill="#47564F"
+              rightFill="#9FB3AA"
             />
             <IsoBlock
-              x={450}
-              y={448}
-              halfWidth={58}
-              halfHeight={32}
-              depth={78}
-              topFill="#8DFFAA"
-              leftFill="#2B6C47"
-              rightFill="#B6FFD0"
-              stroke="rgba(245,255,248,0.28)"
-            />
-            <IsoBlock
-              x={450}
-              y={428}
-              halfWidth={32}
-              halfHeight={18}
-              depth={36}
-              topFill="#F5FFF7"
-              leftFill="#83D89E"
-              rightFill="#D5FFE3"
-              stroke="rgba(245,255,248,0.32)"
-              opacity={0.9}
+              x={394}
+              y={530}
+              halfWidth={30}
+              halfHeight={16}
+              depth={20}
+              topFill="#63B468"
+              leftFill="#5C3B21"
+              rightFill="#7B5230"
             />
           </motion.g>
 
@@ -440,7 +688,7 @@ export function SceneHero({ className = '', ...props }: SceneHeroProps) {
                     }
               }
               transition={{
-                duration: 5.4,
+                duration: 5.2,
                 delay: block.delay,
                 repeat: Number.POSITIVE_INFINITY,
                 ease: 'easeInOut',
@@ -452,20 +700,13 @@ export function SceneHero({ className = '', ...props }: SceneHeroProps) {
                 halfWidth={block.halfWidth}
                 halfHeight={block.halfHeight}
                 depth={block.depth}
-                topFill="#95FFAE"
-                leftFill="#215A39"
-                rightFill="#CAFFDB"
-                stroke="rgba(240,255,244,0.18)"
-                opacity={0.9}
+                topFill="#73DA81"
+                leftFill="#4C311E"
+                rightFill="#8C5D37"
+                opacity={0.92}
               />
             </motion.g>
           ))}
-
-          <path
-            d="M450 310L510 344L450 378L390 344L450 310Z"
-            fill="rgba(245,255,248,0.22)"
-            opacity="0.65"
-          />
         </svg>
       </motion.div>
     </div>

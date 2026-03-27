@@ -9,10 +9,10 @@ type LandingFooterProps = {
 
 export function LandingFooter({ navItems }: LandingFooterProps) {
   return (
-    <footer className="relative pb-28 pt-4 lg:pb-12">
+    <footer className="relative pb-32 pt-6 lg:pb-12">
       <div className="container-shell">
         <div className="section-divider" />
-        <div className="mt-8 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+        <div className="mt-8 flex flex-col gap-5 text-center lg:flex-row lg:items-center lg:justify-between lg:text-left">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.28em] text-white/38">
               The Village S3
@@ -21,7 +21,7 @@ export function LandingFooter({ navItems }: LandingFooterProps) {
               Vote first. Discord second. Copy the IP and play.
             </p>
           </div>
-          <div className="flex flex-wrap gap-4 text-sm text-white/52">
+          <div className="flex flex-wrap justify-center gap-4 text-sm text-white/52 lg:justify-end">
             {navItems.slice(1).map((item) => (
               <a
                 key={item.id}

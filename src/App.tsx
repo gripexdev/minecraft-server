@@ -36,6 +36,8 @@ function App() {
   const canHover = useCanHover()
   const { scrollYProgress } = useScroll()
   const rootRef = useRef<HTMLDivElement>(null)
+  const pointerFrameRef = useRef<number | null>(null)
+  const pointerPositionRef = useRef({ x: '72%', y: '14%' })
   const [activeSection, setActiveSection] = useState('top')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -96,6 +98,14 @@ function App() {
     }
   }, [mobileMenuOpen])
 
+  useEffect(() => {
+    return () => {
+      if (pointerFrameRef.current !== null) {
+        window.cancelAnimationFrame(pointerFrameRef.current)
+      }
+    }
+  }, [])
+
   const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (Boolean(shouldReduceMotion) || !canHover || !rootRef.current) {
       return
@@ -105,13 +115,35 @@ function App() {
     const x = ((event.clientX - rect.left) / rect.width) * 100
     const y = ((event.clientY - rect.top) / rect.height) * 100
 
-    rootRef.current.style.setProperty('--pointer-x', `${x.toFixed(2)}%`)
-    rootRef.current.style.setProperty('--pointer-y', `${y.toFixed(2)}%`)
+    pointerPositionRef.current = {
+      x: `${x.toFixed(2)}%`,
+      y: `${y.toFixed(2)}%`,
+    }
+
+    if (pointerFrameRef.current !== null) {
+      return
+    }
+
+    pointerFrameRef.current = window.requestAnimationFrame(() => {
+      pointerFrameRef.current = null
+
+      if (!rootRef.current) {
+        return
+      }
+
+      rootRef.current.style.setProperty('--pointer-x', pointerPositionRef.current.x)
+      rootRef.current.style.setProperty('--pointer-y', pointerPositionRef.current.y)
+    })
   }
 
   const handlePointerLeave = () => {
     if (!rootRef.current) {
       return
+    }
+
+    if (pointerFrameRef.current !== null) {
+      window.cancelAnimationFrame(pointerFrameRef.current)
+      pointerFrameRef.current = null
     }
 
     rootRef.current.style.setProperty('--pointer-x', '72%')
@@ -201,12 +233,12 @@ function App() {
 
       <LandingFooter navItems={navItems} />
 
-      <div className="fixed inset-x-0 bottom-4 z-50 px-4 lg:hidden">
-        <div className="mx-auto flex max-w-md items-center gap-2 rounded-full border border-white/12 bg-[rgba(6,10,8,0.9)] p-2 shadow-[0_18px_60px_rgba(0,0,0,0.48)] backdrop-blur-2xl">
+      <div className="fixed inset-x-0 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-50 px-3 sm:px-4 lg:hidden">
+        <div className="mx-auto flex max-w-lg items-center gap-2 rounded-[1.6rem] border border-white/12 bg-[rgba(6,10,8,0.92)] p-2.5 shadow-[0_18px_60px_rgba(0,0,0,0.48)] backdrop-blur-2xl sm:rounded-full">
           <ButtonLink href={VOTE_URL} className="min-w-0 flex-1 justify-center" size="lg">
             Vote Now
           </ButtonLink>
-          <CopyIpButton compact className="shrink-0 px-4 py-4" />
+          <CopyIpButton compact className="shrink-0 px-4 py-[1.08rem]" />
         </div>
       </div>
     </div>

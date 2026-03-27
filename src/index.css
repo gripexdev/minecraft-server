@@ -128,11 +128,13 @@ body {
   }
 
   .button-md {
+    min-height: 3rem;
     padding: 0.88rem 1.28rem;
     font-size: 0.74rem;
   }
 
   .button-lg {
+    min-height: 3.45rem;
     padding: 1rem 1.56rem;
     font-size: 0.8rem;
   }
@@ -369,6 +371,29 @@ body {
 
   .tilt-panel:focus-within .tilt-shine {
     opacity: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  @layer components {
+    .section-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.22em;
+    }
+
+    .pill-chip {
+      padding: 0.48rem 0.88rem;
+      font-size: 0.82rem;
+    }
+
+    .button-base {
+      letter-spacing: 0.18em;
+    }
+
+    .hero-stage::before {
+      inset: 0.8rem;
+      border-radius: 1.45rem;
+    }
   }
 }
 

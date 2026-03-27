@@ -10,7 +10,7 @@ export function DiscordSection() {
     <section id="discord" className="relative py-16 sm:py-20">
       <div className="container-shell">
         <Reveal>
-          <div className="glass-panel rounded-[2.4rem] border border-sky-300/12 bg-[linear-gradient(180deg,rgba(105,151,255,0.12),rgba(255,255,255,0.04))] p-6 sm:p-8 lg:p-10">
+          <div className="glass-panel rounded-[2rem] border border-sky-300/12 bg-[linear-gradient(180deg,rgba(105,151,255,0.12),rgba(255,255,255,0.04))] p-5 sm:rounded-[2.4rem] sm:p-8 lg:p-10">
             <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-center">
               <div>
                 <SectionHeading
@@ -24,9 +24,10 @@ export function DiscordSection() {
                   }
                   description="All updates for The Village S3 live here."
                   className="max-w-2xl"
+                  align="responsive"
                 />
 
-                <div className="mt-6 flex flex-wrap gap-2">
+                <div className="mt-6 flex flex-wrap justify-center gap-2 lg:justify-start">
                   {discordPoints.map((point) => (
                     <span key={point} className="pill-chip">
                       {point}
@@ -35,14 +36,16 @@ export function DiscordSection() {
                 </div>
               </div>
 
-              <ButtonLink
-                href={DISCORD_URL}
-                variant="secondary"
-                size="lg"
-                className="w-full justify-center"
-              >
-                Join Discord
-              </ButtonLink>
+              <div className="mx-auto w-full max-w-md lg:mx-0 lg:max-w-none">
+                <ButtonLink
+                  href={DISCORD_URL}
+                  variant="secondary"
+                  size="lg"
+                  className="w-full justify-center"
+                >
+                  Join Discord
+                </ButtonLink>
+              </div>
             </div>
           </div>
         </Reveal>

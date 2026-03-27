@@ -21,20 +21,20 @@ export function SiteHeader({
   onToggleMobileMenu,
 }: SiteHeaderProps) {
   return (
-    <header className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-6">
+    <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-6 sm:pt-4">
       <div className="container-shell">
-        <nav className="glass-panel flex items-center justify-between gap-4 rounded-full px-4 py-3 sm:px-5">
-          <a href="#top" className="flex min-w-0 items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-emerald-300/20 bg-emerald-300/10 shadow-[0_0_38px_rgba(130,255,144,0.18)]">
+        <nav className="glass-panel flex items-center justify-between gap-3 rounded-[1.7rem] px-3 py-3 sm:gap-4 sm:rounded-full sm:px-5">
+          <a href="#top" className="flex min-w-0 flex-1 items-center gap-3 lg:flex-none">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[1.15rem] border border-emerald-300/20 bg-emerald-300/10 shadow-[0_0_38px_rgba(130,255,144,0.18)] sm:h-10 sm:w-10 sm:rounded-2xl">
               <span className="font-pixel text-[1.7rem] leading-none text-emerald-100">
                 V
               </span>
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold uppercase tracking-[0.32em] text-white">
+              <p className="truncate text-[0.76rem] font-semibold uppercase tracking-[0.22em] text-white sm:text-sm sm:tracking-[0.32em]">
                 {SERVER_NAME}
               </p>
-              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.28em] text-emerald-200/58">
+              <p className="hidden text-[0.68rem] font-semibold uppercase tracking-[0.28em] text-emerald-200/58 sm:block">
                 Premium SMP / S3
               </p>
             </div>
@@ -57,12 +57,12 @@ export function SiteHeader({
             ))}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <a
               href={DISCORD_URL}
               target="_blank"
               rel="noreferrer"
-              className="button-base button-secondary hidden px-4 py-2.5 text-xs tracking-[0.22em] sm:inline-flex"
+              className="button-base button-secondary hidden px-4 py-2.5 text-xs tracking-[0.22em] md:inline-flex"
             >
               Join Discord
             </a>
@@ -75,7 +75,7 @@ export function SiteHeader({
             <button
               type="button"
               onClick={onToggleMobileMenu}
-              className="icon-button inline-flex h-11 w-11 lg:hidden"
+              className="icon-button inline-flex h-12 w-12 lg:hidden sm:h-11 sm:w-11"
               aria-expanded={mobileMenuOpen}
               aria-label="Toggle navigation menu"
             >
